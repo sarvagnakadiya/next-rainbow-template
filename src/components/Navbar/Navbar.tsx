@@ -1,5 +1,5 @@
 "use client";
-
+import { useEffect, useState } from "react";
 import {
   Disclosure,
   DisclosureButton,
@@ -16,7 +16,7 @@ import { useAccount } from "wagmi";
 
 const navigation = [
   { name: "Home", href: "/", current: true },
-  { name: "profile", href: "/user/:address", current: false },
+  { name: "Profile", href: "/user/:address", current: false },
   { name: "Projects", href: "/projects", current: false },
   { name: "Calendar", href: "#", current: false },
 ];
@@ -27,6 +27,15 @@ function classNames(...classes: string[]) {
 
 export default function Navbar() {
   const { address, isConnected } = useAccount();
+  const [currentPath, setCurrentPath] = useState("");
+
+  useEffect(() => {
+    // Ensure this runs only on the client-side
+    if (typeof window !== "undefined") {
+      setCurrentPath(window.location.pathname);
+    }
+  }, []);
+
   return (
     <Disclosure as="nav" className="bg-gray-800">
       {({ open }) => (
@@ -47,36 +56,34 @@ export default function Navbar() {
               <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
                 <div className="hidden sm:ml-6 sm:block">
                   <div className="flex space-x-4">
-                    <>
-                      {navigation.map((item) => {
-                        // Check if the current path matches the item's href, including dynamic paths
-                        const isCurrent =
-                          location.pathname ===
-                          (item.href === "/user/:address"
-                            ? `/user/${address}`
-                            : item.href);
+                    {navigation.map((item) => {
+                      // Check if the current path matches the item's href, including dynamic paths
+                      const isCurrent =
+                        currentPath ===
+                        (item.href === "/user/:address"
+                          ? `/user/${address}`
+                          : item.href);
 
-                        return (
-                          <a
-                            key={item.name}
-                            href={
-                              item.href === "/user/:address"
-                                ? `/user/${address}`
-                                : item.href
-                            }
-                            className={classNames(
-                              isCurrent
-                                ? "bg-gray-900 text-white"
-                                : "text-gray-300 hover:bg-gray-700 hover:text-white",
-                              "rounded-md px-3 py-2 text-sm font-medium"
-                            )}
-                            aria-current={isCurrent ? "page" : undefined}
-                          >
-                            {item.name}
-                          </a>
-                        );
-                      })}
-                    </>
+                      return (
+                        <a
+                          key={item.name}
+                          href={
+                            item.href === "/user/:address"
+                              ? `/user/${address}`
+                              : item.href
+                          }
+                          className={classNames(
+                            isCurrent
+                              ? "bg-gray-900 text-white"
+                              : "text-gray-300 hover:bg-gray-700 hover:text-white",
+                            "rounded-md px-3 py-2 text-sm font-medium"
+                          )}
+                          aria-current={isCurrent ? "page" : undefined}
+                        >
+                          {item.name}
+                        </a>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -103,14 +110,18 @@ export default function Navbar() {
                 <DisclosureButton
                   key={item.name}
                   as="a"
-                  href={item.href}
+                  href={
+                    item.href === "/user/:address"
+                      ? `/user/${address}`
+                      : item.href
+                  }
                   className={classNames(
-                    item.current
+                    currentPath === item.href
                       ? "bg-gray-900 text-white"
                       : "text-gray-300 hover:bg-gray-700 hover:text-white",
                     "block rounded-md px-3 py-2 text-base font-medium"
                   )}
-                  aria-current={item.current ? "page" : undefined}
+                  aria-current={currentPath === item.href ? "page" : undefined}
                 >
                   {item.name}
                 </DisclosureButton>
